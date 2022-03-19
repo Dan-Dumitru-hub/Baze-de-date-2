@@ -1,0 +1,102 @@
+
+CREATE OR REPLACE PACKAGE BODY test AS 
+	FUNCTION existasef(id_ang INTEGER) RETURN VARCHAR2
+	AS
+BEGIN
+    FOR i IN (SELECT DISTINCT manager_id FROM departments WHERE manager_id IS NOT NULL)
+    LOOP
+        IF id_ang = i.manager_id  THEN
+            RETURN 'DA';
+        END IF;
+    END LOOP;
+    
+    FOR i IN (SELECT DISTINCT manager_id FROM employees WHERE manager_id IS NOT NULL)
+    LOOP 
+        IF id_ang = i.manager_id THEN
+            RETURN 'DA';
+        END IF;
+    END LOOP;
+    
+    RETURN 'NU';
+END;
+
+CREATE OR REPLACE PROCEDURE Afisarenume(nume VARCHAR2, prenume VARCHAR2)
+AS
+BEGIN
+    dbms_output.put_line(RPAD(nume, 50) || RPAD(prenume, 50)
+        
+      
+        );
+END;
+
+CREATE OR REPLACE FUNCTION F_TariDistincte(id_ang NUMBER)
+RETURN NUMBER
+AS
+    nr_tari NUMBER;
+BEGIN
+    SELECT COUNT(DISTINCT locations.country_id)
+    INTO nr_tari
+    FROM employees
+    JOIN departments ON departments.department_id = employees.department_id
+    JOIN locations ON locations.location_id = departments.location_id
+    WHERE employees.manager_id = id_ang;    
+
+    RETURN nr_tari;
+END;
+
+
+
+CREATE OR REPLACE FUNCTION diferenta_salariu(id_ang NUMBER)
+RETURN NUMBER
+as sal Number
+begin
+
+SELECT 
+        j.max_salary - MAX(e.salary) diff_max
+        into sal
+    
+    FROM employees e
+    JOIN jobs j on e.job_id = j.job_id
+    where id_ang=e.employee_id
+    GROUP BY  j.max_salary;
+    return sal
+end
+
+
+CREATE OR REPLACE FUNCTION nu_contine_jobul(id_ang NUMBER)
+RETURN NUMBER
+
+begin
+
+FOR i IN (SELECT DISTINCT job_id FROM employees )
+    LOOP
+        IF id_ang = i.job_id  THEN
+            RETURN 'NU';
+        END IF;
+    END LOOP;
+end
+
+
+
+PROCEDURE show_content
+ AS
+ BEGIN
+
+ FOR contor IN employees.FIRST..employees.LAST
+    LOOP
+        dbms_output.put_line(RPAD(employees(contor).nume, 46) || RPAD(employees(contor).prenume, 10) || RPAD(diferenta_salariu(contor), 46) 
+         || RPAD(diferenta_salariu(contor), 10) || RPAD(existasef(contor), 10)  );
+    END LOOP;
+
+
+ end
+
+
+SET SERVEROUTPUT ON;
+BEGIN
+ test.show_content;
+END;
+
+
+
+

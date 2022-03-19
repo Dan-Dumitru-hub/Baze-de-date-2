@@ -1,0 +1,29 @@
+ex 3 db.createCollection("students")
+e4 var studs = [
+    {"student": { "firstname": "George", "lastname": "Popescu"}, "an": 4, "grupa": "341C2", "materii": [{"nume": "BD2", "an": 4}, {"nume": "IOCLA", "an": 2}], "cunostinte": ["Python", "SQL"]  },
+    {"student": { "firstname": "Georgiana", "lastname": "Petrescu"}, "an": 4, "grupa": "341C2", "materii": [{"nume": "BD2", "an": 4}, {"nume": "SCAD", "an": 4}], "cunostinte": ["Python", "SQL"]  },
+    {"student": { "firstname": "Dan", "lastname": "Tipa"}, "an": 4, "grupa": "343C3", "materii": [{"nume": "BD", "an": 3}, {"nume": "RL", "an": 3}, {"nume": "APD", "an": 2}], "cunostinte": ["Java", "C++", "SQL"] },
+   
+]
+ 
+db.students.insert(studs)
+
+ex5: db.createCollection("documents")
+
+mongoimport --host=127.0.0.1 --port=27017 --db=BD2 --collection=students --type=json --file bd2_mongo.json
+
+
+ex6: db.students.find().sort({"student.firstname": -1}).limit(4)
+
+ex7: Cererile filtreaza tabela de date
+
+ex8: db.students.find({$and: [{"an": 4}, {"cunostinte": {$in: ['C', 'SQL']}} , {"restante":true}]})
+
+ex9: db.students.find({$and: [ {"sef": false},{"cunostinte.2": "Python"} ]}, {"_id": 0, "student.firstname": 1,"student.lastname": 1,"cunostinte": 1})
+
+ex10: db.students.update({an: 3}, {$push: {"materii":{"nume": "LFA", "an":4},
+{"materii":{"nume": "EGC", "an":4}
+ })
+
+
+ex11:  db.students.remove({"materii":"BD2"},{justOne:true})

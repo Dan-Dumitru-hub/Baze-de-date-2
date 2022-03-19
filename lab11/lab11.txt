@@ -1,0 +1,86 @@
+ex2 
+db.documents.createIndex({author: 1}) index simplu
+db.documents.createIndex({gender: 1, age: 1}) compus
+db.documents.createIndex({"words.word": 1}) pe documente imbricate
+db.documents.createIndex({"geoLocation": "2d"}) geo-spațiali
+db.documents.createIndex({"lemmaText": "text"}) textuali  
+db.documents.createIndex({"date": "hashed"}) hashed 
+
+ex3
+db.documents.find( { geoLocation: { $within: { $box: [[20, -100], [40, 90]] } } }, { geoLocation: 1 },{ $text: { $search: "tech  engineering", $language: "english", $caseSensitive: false, $diacriticSensitive: false } } ,  { lemmaText: 1 } )
+
+ex4
+tokenization = function(q){
+    var cursor = db.documents.find(q,{"_id": 0, lemmaText: 1});
+    var tokens = Array();
+    cursor.forEach(function(elem){
+        tokens = tokens.concat(elem["lemmaText"].split(" "));
+    });
+    return tokens;
+}
+
+
+
+ex5
+countWords  = function(q){
+    var cursor = tokenization(q)
+    var dict = {};
+    cursor.forEach(function(elem){
+        if (dict[elem] == undefined)
+        dict[elem] =1;
+        else 
+        dict[elem] = dict[elem]+1;
+
+        
+    });
+    return dict;
+}
+
+
+
+ex6
+db.system.js.save({_id: "countWords",value :
+function(q){
+    var cursor = tokenization(q)
+    var dict = {};
+    cursor.forEach(function(elem){
+        if (dict[elem] == undefined)
+        dict[elem] =1;
+        else 
+        dict[elem] = dict[elem]+1;
+
+        
+    });
+    return dict;
+}
+ })
+db.loadServerScripts()
+
+ex7
+db.documents.distinct("words")
+
+ex8
+db.documents.aggregate([
+    { $match: q },
+    { $project: { words: { $split: ["$lemmaText", " "]}}},
+    { $unwind: "$words" },
+    { $group: { _id: "$words", counts: { $sum: 1 } } }
+])
+
+ex9
+ex10
+mapFunction = function() {
+    var tokens = this.lemmaText.split(" ");
+    for (var idx=0; idx<tokens.length; idx++){
+        emit(tokens[idx], 1);
+    }
+}
+ 
+reduceFunction = function(key, values) {
+    return Array.sum(values);
+};
+ 
+var q = {"gender": "female"}       
+db.documents.mapReduce(mapFunction, reduceFunction, {query: q, out: "wordCounts"});
+
+ex11
